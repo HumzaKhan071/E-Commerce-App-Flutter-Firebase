@@ -1,118 +1,129 @@
-import 'package:e_commerce_app/home_screen/drawer.dart';
-import 'package:e_commerce_app/home_screen/home_screen_controller.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../categories_featured_screen/categories_and_featured_screen.dart';
+import '../items_screen/items_screen.dart';
+import 'drawer.dart';
+import 'home_screen_controller.dart';
 import 'model_class/categories_model.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreenView extends StatelessWidget {
+  const HomeScreenView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Size size = Get.size;
-
     final controller = Get.put(HomeScreenController());
+
     return Container(
       color: Colors.blueAccent,
-      child: SafeArea(child: GetBuilder<HomeScreenController>(builder: (value) {
-        if (!value.isLoading) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(
-                "Ecommerce App",
-              ),
-              backgroundColor: Colors.blueAccent,
-              actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.shopping_cart),
-                )
-              ],
-            ),
-            drawer: HomeScreenDrawer(),
-            body: SizedBox(
-              height: size.height,
-              width: size.width,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: size.height / 3.5,
-                      width: size.width / 1.05,
-                      child: PageView.builder(
-                          onPageChanged: controller.changeIndicator,
-                          itemCount: controller.bannerData.length,
-                          itemBuilder: ((context, index) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: NetworkImage(
-                                          controller.bannerData[index].image))),
-                            );
-                          })),
+      child: SafeArea(
+        child: GetBuilder<HomeScreenController>(
+          builder: (value) {
+            if (!value.isLoading) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text("Ecommerce App"),
+                  backgroundColor: Colors.blueAccent,
+                  actions: [
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.shopping_cart),
                     ),
-                    SizedBox(
-                        height: size.height / 25,
-                        width: size.width,
-                        child: Obx(() {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              for (int i = 0;
-                                  i < controller.isSelected.length;
-                                  i++)
-                                indicator(size, controller.isSelected[i].value)
-                            ],
-                          );
-                        })),
-                    categoriesTitle(size, "All Categories", () {}),
-                    listViewBuilder(size, controller.categoriesData),
-                    SizedBox(height: size.height / 25),
-                    categoriesTitle(size, "Featured", () {}),
-                    listViewBuilder(size, controller.featuredData)
                   ],
                 ),
-              ),
-            ),
-          );
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      })),
-    );
-  }
+                drawer: HomeScreenDrawer(),
+                body: SizedBox(
+                  height: size.height,
+                  width: size.width,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // banner
+                        SizedBox(
+                          height: size.height / 3.5,
+                          width: size.width,
+                          child: PageView.builder(
+                            itemCount: controller.bannerData.length,
+                            onPageChanged: controller.changeIndicator,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                          controller.bannerData[index].image),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
 
-  Widget listViewBuilderItems(Size size, CategoriesModel categories) {
-    return Container(
-      height: size.height / 10,
-      width: size.width / 2.2,
-      child: Column(
-        children: [
-          Container(
-              height: size.height / 16,
-              width: size.width / 2.2,
-              decoration: BoxDecoration(
-                image: DecorationImage(image: NetworkImage(categories.image)),
-              )),
-          Expanded(
-              child: SizedBox(
-            child: Text(
-              categories.title,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-            ),
-          ))
-        ],
+                        // indicator
+
+                        SizedBox(
+                          height: size.height / 25,
+                          width: size.width,
+                          child: Obx(() {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (int i = 0;
+                                    i < controller.isSelected.length;
+                                    i++)
+                                  indicator(
+                                      size, controller.isSelected[i].value)
+                              ],
+                            );
+                          }),
+                        ),
+
+                        // categories..
+
+                        categoriesTitle(size, "All Categories", () {
+                          Get.to(() => CategoriesAndFeaturedScreen(
+                                model: controller.categoriesData,
+                              ));
+                        }),
+
+                        listViewBuilder(size, controller.categoriesData),
+
+                        SizedBox(
+                          height: size.height / 25,
+                        ),
+
+                        categoriesTitle(size, "Featured", () {
+                          Get.to(() => CategoriesAndFeaturedScreen(
+                                model: controller.featuredData,
+                              ));
+                        }),
+
+                        listViewBuilder(size, controller.featuredData),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }
 
   Widget listViewBuilder(Size size, List<CategoriesModel> data) {
     return SizedBox(
-      height: size.height / 9,
+      height: size.height / 7,
       width: size.width,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -120,6 +131,49 @@ class HomeScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           return listViewBuilderItems(size, data[index]);
         },
+      ),
+    );
+  }
+
+  Widget listViewBuilderItems(Size size, CategoriesModel categroies) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: GestureDetector(
+        onTap: () {
+          Get.to(() => ItemsScreen(
+                categoryId: categroies.id,
+                categoryTitle: categroies.title,
+              ));
+        },
+        child: SizedBox(
+          height: size.height / 7,
+          width: size.width / 4.2,
+          child: Column(
+            children: [
+              Container(
+                height: size.height / 10,
+                width: size.width / 2.2,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(categroies.image),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SizedBox(
+                  child: Text(
+                    categroies.title,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -133,15 +187,21 @@ class HomeScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           TextButton(
-              onPressed: () => function(),
-              child: Text("View More",
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontSize: 15,
-                  )))
+            onPressed: () => function(),
+            child: const Text(
+              "View More",
+              style: TextStyle(
+                color: Colors.blueAccent,
+                fontSize: 15,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -149,11 +209,11 @@ class HomeScreen extends StatelessWidget {
 
   Widget indicator(Size size, bool isSelected) {
     return Padding(
-      padding: const EdgeInsets.all(2),
+      padding: const EdgeInsets.all(2.0),
       child: Container(
         height: isSelected ? size.height / 80 : size.height / 100,
         width: isSelected ? size.height / 80 : size.height / 100,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.black,
         ),
