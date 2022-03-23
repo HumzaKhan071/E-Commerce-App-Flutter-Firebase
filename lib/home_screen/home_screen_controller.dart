@@ -13,42 +13,21 @@ class HomeScreenController extends GetxController {
   bool isLoading = true;
   List<RxBool> isSelected = [];
 
-  void getAllData() async {
-    await Future.wait([
-      getBannerData(),
-      getAllCategories(),
-      getFeaturedData(),
-    ]).then((value) {
-      print("Data");
-      print(bannerData[0].image);
-      print(categoriesData[0].id);
-      print(featuredData[1].id);
-      isLoading = false;
-      update();
-    });
-  }
-
-  void changeIndicator(int index) {
-    for (var i = 0; i < isSelected.length; i++) {
-      if (isSelected[i].value) {
-        isSelected[i].value = false;
-      }
-    }
-
-    isSelected[index].value = true;
-  }
-
   Future<void> getBannerData() async {
-    await _firestore.collection('banner').get().then((value) {
-      bannerData =
-          value.docs.map((e) => BannerDataModel.fromJson(e.data())).toList();
+    try {
+      await _firestore.collection("banner").get().then((value) {
+        bannerData =
+            value.docs.map((e) => BannerDataModel.fromJson(e.data())).toList();
 
-      for (var i = 0; i < bannerData.length; i++) {
-        isSelected.add(false.obs);
-      }
+        for (var i = 0; i < bannerData.length; i++) {
+          isSelected.add(false.obs);
+        }
 
-      isSelected[0].value = true;
-    });
+        isSelected[0].value = true;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> getAllCategories() async {
@@ -59,10 +38,14 @@ class HomeScreenController extends GetxController {
   }
 
   Future<void> getFeaturedData() async {
-    await _firestore.collection('featured').get().then((value) {
-      featuredData =
-          value.docs.map((e) => CategoriesModel.fromJson(e.data())).toList();
-    });
+    try {
+      await _firestore.collection('featured').get().then((value) {
+        featuredData =
+            value.docs.map((e) => CategoriesModel.fromJson(e.data())).toList();
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -70,5 +53,34 @@ class HomeScreenController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     getAllData();
+  }
+
+  void getAllData() async {
+    try {
+      await Future.wait([
+        getBannerData(),
+        getAllCategories(),
+        getFeaturedData(),
+      ]).then((value) {
+        print("Data");
+        print(bannerData[0].image);
+        print(categoriesData[0].id);
+        print(featuredData[1].id);
+        isLoading = false;
+        update();
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void changeIndicator(int index) {
+    for (var i = 0; i < isSelected.length; i++) {
+      if (isSelected[i].value) {
+        isSelected[i].value = false;
+      }
+    }
+
+    isSelected[index].value = true;
   }
 }

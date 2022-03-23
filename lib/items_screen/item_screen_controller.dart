@@ -97,11 +97,11 @@ class ItemScreenController extends GetxController {
     }
   }
 
-  int calculateDiscount(int totalPrice, int sellingPrice) {
+ int calculateDiscount(int totalPrice, int sellingPrice) {
     double discount = ((totalPrice - sellingPrice) / totalPrice) * 100;
 
     return discount.toInt();
-  }
+  } 
 
   Future<void> searchProducts(String query) async {
     if (query.isNotEmpty) {

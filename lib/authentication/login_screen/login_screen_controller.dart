@@ -20,7 +20,7 @@ class LoginScreenController extends GetxController {
 
     try {
       await _auth.verifyPhoneNumber(
-        phoneNumber: "+91${phone.text}",
+        phoneNumber: "+92${phone.text}",
         verificationCompleted: (PhoneAuthCredential credential) async {
           await _auth.signInWithCredential(credential);
           showAlert("Verifed");
